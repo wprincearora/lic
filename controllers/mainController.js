@@ -21,6 +21,7 @@ var badReq = (res)=>{
 
 var login= (req,res)=>{
   var input = _.pick(req.body,['username','password']);
+  input.verified=1;
   if(_.isEmpty(input.password) || _.isEmpty(input.username) ){
     return badReq(res);
     }
@@ -96,7 +97,7 @@ var updatePolicyStatus = (req,res,next)=>{
 }
 
 var getCustomers = (req,res,next)=>{
-  db.Customers.findAll({},{where:{agent_id:req.body._id}}).then(data=>{
+  db.Customers.findAll({where:{agent_id:req.body._id}}).then(data=>{
     // Res.success(res,{d:data});
     res.send(data);
   });

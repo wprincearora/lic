@@ -31,7 +31,10 @@ module.exports = (sequelize, DataTypes) => {
     token:{
       type: DataTypes.STRING,
       allowNull:true,
-
+    },
+    verified:{
+      type: DataTypes.BOOLEAN,
+      allowNull:true,
     }
   },{
          timestamps: false,
@@ -56,7 +59,8 @@ module.exports = (sequelize, DataTypes) => {
               User.update({token},{
                 where:{id:info.id},
               }).then(data=>{}).catch(e=>{});
-            return  {error:false,token};
+
+            return  {error:false,token,info};
 
             }else{
               return {error:true,msg:"Invalid Email or Password"};

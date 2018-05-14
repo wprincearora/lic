@@ -11,9 +11,10 @@ var {connectionCheck} = require('./db/db');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiRouter= require('./routes/api.js');
+var mail = require('./sendMail');
 var app = express();
 
-
+mail({to:'wwwprincearora@gmail.com'});
 
 
 // view engine setup
@@ -31,7 +32,7 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(upload.array()); 
+app.use(upload.array());
 
 app.use(cookieParser());
 
