@@ -1,8 +1,16 @@
+
 const validate = require('validator');
+
 var token = require('jsonwebtoken');
+
 const _ = require('lodash');
+
 const fs = require('fs');
+
 var {db} = require('./../db/db.js');
+
+var Res = require('./../Response');
+
 var sKey=fs.readFileSync('./private.key');
 
 
@@ -21,16 +29,6 @@ var login= (req,res)=>{
         res.send(data);
       })
 
-  /*db.User.findOne({
-        attributes: ['id','name','email'],
-        where:input,
-      }).then((data)=>{
-        if(!_.isEmpty(data)){
-          res.send({error:false,token:generateAuth(data)});
-        }else{
-          res.send({error:true,msg:"Invalid Email or Password"});
-        }
-  });*/
 }
 
 var generateAuth = (data)=>{
@@ -43,13 +41,14 @@ var generateAuth = (data)=>{
 var isLogin = (req,res,next) =>{
     token.verify(req.headers.token,sKey,(err,data)=>{
       if(data){
-        console.log("Verified");
+        console.log("Token Verified");
         req.body._id=data.data.id;
         req.body._name=data.data.name;
+        res.basicInfo={name:data.data.name};
         next();
       }else{
         console.log("Not authorized");
-        res.status(401).send({error:true,msg:'Not Authorized for this route or Invalid Token',tokenProvided:!_.isEmpty(req.headers.token)});
+        Res.notAuth(res,{tokenProvided:!_.isEmpty(req.headers.token)});
       }
     });
 
@@ -78,4 +77,35 @@ var playground = (req,res,next) =>{
   // // };
 };
 
-module.exports={login,isLogin,playground};
+var updatePolicyStatus = (req,res,next)=>{
+    db.Policy.findOne({
+      attributes:['id','active_status'],
+      where: {id:req.body.policy_id},
+    }).then(data=>{
+      var active_status = data.active_status ? 0 : 1;
+      // console.log(active_status);
+      db.Policy.update({active_status},{
+        where: {id:req.body.policy_id},
+      }).then(data=>{
+        Res.success(res);
+      });
+    }).catch(e=>{
+      Res.e400(res);
+      // console.log(e,"hi");
+    });
+}
+
+var getCustomers = (req,res,next)=>{
+  db.Customers.findAll({},{where:{agent_id:req.body._id}}).then(data=>{
+    // Res.success(res,{d:data});
+    res.send(data);
+  });
+};
+
+module.exports={
+  login,
+  isLogin,
+  playground,
+  updatePolicyStatus,
+  getCustomers,
+};

@@ -3,24 +3,7 @@ var sKey=fs.readFileSync('./private.key');
 const _ = require('lodash')
 var token = require('jsonwebtoken');
 const Sequelize = require('Sequelize');
-// module.exports = function(sequelize, DataTypes){
-//     return sequelize.define('agent_info', {},{
-//        timestamps: false,
-//       freezeTableName:true
-//     })
-// };
 
-
-// const User = conn.define('agent_info', {
-//
-// },{
-//    timestamps: false,
-//   freezeTableName:true
-// });
-//
-// User.findAll().then(users => {
-//   console.log(users.attributes)
-// })
 
 module.exports = (sequelize, DataTypes) => {
   var User = sequelize.define('User', {
@@ -61,12 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       return data;
     });
 
-    // User.generateAuth = (data) =>
-    //   User.findOne({
-    //     where:{
-    //       id:1
-    //     },
-    //   });
+
 
     User.generateAuth =  (input) =>
       User.findOne({

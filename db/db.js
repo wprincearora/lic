@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize('lic', 'forge', '3YlEdiHhvEp6ZJ9dPjHq', {
   host: '128.199.70.36',
@@ -26,10 +27,14 @@ connectionCheck = (req,res,next)=>{
   });
 }
 
-
+sequelize.import('./../models/Customers.js');
 sequelize.import('./../models/User.js');
+sequelize.import('./../models/Policy.js');
+
+
 var db=sequelize.models;
 
-
-
-   module.exports={db,connectionCheck};
+   module.exports={
+     db,
+     connectionCheck,
+   };
