@@ -7,7 +7,7 @@ const Sequelize = require('Sequelize');
 
 module.exports = (sequelize, DataTypes) => {
 
-  var Customers = sequelize.define('Customers', {
+  var Customer = sequelize.define('customer', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -17,26 +17,68 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false,
       notNull:true,
-       is: ["^[a-z]+$",'i'],
+       validate:{
+         is:{
+           args: /^[a-z]+$/i,
+           msg:"Invalid Name .It  must be a string",
+         }
+       },
     },
-    mobile_number: {
-      type: DataTypes.STRING,
+    dob: {
+      type: DataTypes.DATEONLY,
       allowNull:false,
-      notNull:true,
     },
     agent_id:{
       type:DataTypes.INTEGER,
       allowNull:false,
-      notNull:true,
+
     },
+    email:{
+      type:DataTypes.STRING,
+      allowNull:true,
+      validate:{
+        isEmail:{
+          args:true,
+          msg:"Invalid Email"
+        }
+
+      },
+    },active_status:{
+      type:DataTypes.BOOLEAN,
+      allowNull:true,
+      defaultValue:true,
+
+    },
+    is_deleted:{
+      type:DataTypes.BOOLEAN,
+      defaultValue:false,
+    },
+    mobile1:{
+      type:DataTypes.STRING,
+      allowNull:false,
+      validate:{
+        is:{
+          args:/^[6-9][0-9]{9}$/,
+          msg:"Invalid Mobile Number 1"
+        }
+      }
+    },
+    mobile2:{
+      type:DataTypes.STRING,
+      allowNull:true,
+      validate:{
+        is:{
+          args:/^[6-9][0-9]{9}$/,
+          msg:"Invalid Mobile Number 2"
+        }
+      }
+    }
 
   },{
-         timestamps: false,
-        freezeTableName:true,
-        tableName:'customer_info'
+      //Options
       });
 
-      Customers.test = () => User.findOne().then((data) => {
+      Customer.test = () => User.findOne().then((data) => {
       //console.log(data);
       return data;
     });
@@ -48,5 +90,5 @@ module.exports = (sequelize, DataTypes) => {
   //   models.User.hasMany(models.Task);
   // };
 
-  return Customers;
+  return Customer;
 };

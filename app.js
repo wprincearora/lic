@@ -11,10 +11,10 @@ var {connectionCheck} = require('./db/db');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiRouter= require('./routes/api.js');
-var mail = require('./sendMail');
+// var sendMail = require('./sendMail');
 var app = express();
 
-mail({to:'wwwprincearora@gmail.com'});
+////sendMail({to:'wwwprincearora@gmail.com'});
 
 
 // view engine setup

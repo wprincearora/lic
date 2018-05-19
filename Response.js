@@ -5,6 +5,9 @@ var badReq = (res,data={})=>{
   if(!data.msg){
     data.msg="Invalid Request";
   }
+  if(data.validationError){
+    data.errors=errorParser(data.errors);
+  }
   res.status(400).send(data);
 }
 
@@ -32,5 +35,12 @@ var e400 = (res,data={})=>{
   }
   res.status(417).send(data);
 }
-
-module.exports={badReq,notAuth,success,e400};
+var errorParser = (arr)=>{
+  var errors=[];
+  for(var i=0; i<arr.length;i++){
+    var obj=arr[i];
+    errors.push(obj.message);
+  }
+  return errors;
+}
+module.exports={badReq,notAuth,success,e400,errorParser};

@@ -3,19 +3,17 @@ var sKey=fs.readFileSync('./private.key');
 const _ = require('lodash')
 var token = require('jsonwebtoken');
 const Sequelize = require('Sequelize');
-
+ // const {sequelize}= require('./../db/db');
+var modes=[1,2,3,4,5];
 
 module.exports = (sequelize, DataTypes) => {
+    ////
+
   var Policy = sequelize.define('Policy', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
-    },
-    agent_id:{
-      type:DataTypes.INTEGER,
-      allowNull:false,
-      notNull:true,
     },
     customer_id:{
       type:DataTypes.INTEGER,
@@ -25,56 +23,70 @@ module.exports = (sequelize, DataTypes) => {
     policy_number:{
       type:DataTypes.INTEGER,
       allowNull:false,
-      notNull:true,
     },
     branch_code:{
-      type:DataTypes.INTEGER,
-      allowNull:false,
-      notNull:true,
+      type:DataTypes.STRING,
+      allowNull:true,
     },
-    company:{
+    plan_name:{
+      type:DataTypes.STRING,
+      allowNull:true,
+    },
+    company_id:{
       type:DataTypes.INTEGER,
-      allowNull:false,
-      notNull:true,
+      allowNull:true,
     },
     mode:{
       type:DataTypes.INTEGER,
       allowNull:false,
-      notNull:true,
+      validate:{
+        isIn:{
+          args:[modes] ,
+          msg:"Invalid Mode",
+        }
+      }
     },
-    installment_number:{
+    term_duration:{
+      type:DataTypes.FLOAT,
+      allowNull:false,
+    },
+    issue_date:{
+      type:DataTypes.DATEONLY,
+    },
+    date_of_commencement:{
+      type:DataTypes.DATEONLY,
+      allowNull:false,
+    },
+    date_of_maturity:{
+      type:DataTypes.DATEONLY,
+      allowNull:true,
+    },
+    total_installments:{
       type:DataTypes.INTEGER,
       allowNull:false,
-      notNull:true,
     },
-    due_date:DataTypes.DATEONLY,
-    start_date:DataTypes.DATEONLY,
-    end_date:DataTypes.DATEONLY,
-    plan:{
+    premium_amount:{
       type:DataTypes.INTEGER,
       allowNull:false,
-      notNull:true,
     },
-    total_amount:{
-      type:DataTypes.INTEGER,
+    la_name:{
+      type:DataTypes.STRING,
+      allowNull:true,
+    },
+    first_due_date:{
+      type:DataTypes.DATEONLY,
       allowNull:false,
-      notNull:true,
     },
-    premium_pay_status:{
-      type:DataTypes.INTEGER,
-      allowNull:false,
-      notNull:true,
-    },
-    active_status:{
+    is_deleted:{
       type:DataTypes.BOOLEAN,
       allowNull:true,
-    }
-
+      defaultValue:false,
+    },
 
   },{
-         timestamps: false,
+
         freezeTableName:true,
-        tableName:'customer_policy_info'
+        tableName:'tbl_policies'
       });
 
     //   Policy.test = () => Policy.findOne().then((d ata) => {
@@ -82,7 +94,7 @@ module.exports = (sequelize, DataTypes) => {
     //   return data;
     // });
 
-      
+
 
   return Policy;
 };

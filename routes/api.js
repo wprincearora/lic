@@ -13,6 +13,7 @@ var isLogin = require('./../middlewares/isLogin');
 //unauthorized routes
 router.post('/login',mainController.login);
 
+// router.post('/hi')
 //authorized Routes
 router.use(isLogin);
 
@@ -23,16 +24,28 @@ router.get('/',[function(req,res){
 /********************Routes for policies*****************************/
 proutes.use(isValid);
 
-proutes.post('/update/status',mainController.updatePolicyStatus);
+proutes.post('/add',[mainController.addPolicy,mainController.makeInstallments]);
+// proutes.post('/update/status',mainController.updatePolicyStatus);
 
 
 
 /******************************************************************/
+
 router.use('/policy/',proutes);
+
+
 
 router.post('/get/list',mainController.getCustomers);
 
 router.get('/playground',mainController.playground);
+
+router.post('/add/customer',mainController.addCustomer);
+
+router.post('/delete/customer',[isValid,mainController.deleteCustomer]);
+
+router.post('/update/customer',[isValid,mainController.updateCustomer]);
+
+router.post('/update/customer/status',[isValid,mainController.updateCustomerStatus]);
 
 /////////
 module.exports = router;
