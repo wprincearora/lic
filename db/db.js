@@ -38,9 +38,13 @@ connectionCheck = (req,res,next)=>{
 }
 
 sequelize.import('./../models/Customers.js');
+
 sequelize.import('./../models/User.js');
+
 sequelize.import('./../models/Policy.js');
+
 sequelize.import('./../models/installments.js');
+
 sequelize.import('./../models/Modes.js');
 
 var db=sequelize.models;

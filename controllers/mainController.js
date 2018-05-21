@@ -98,7 +98,8 @@ var updatePolicyStatus = (req,res,next)=>{
 var getCustomers = (req,res,next)=>{
   db.customer.findAll({where:{agent_id:req.body._id}}).then(data=>{
     // Res.success(res,{d:data});
-    res.send(data);
+    console.log(data);
+    Res.success(res,{data});
   });
 };
 
