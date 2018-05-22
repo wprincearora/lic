@@ -15,7 +15,7 @@ var Res = require('./../Response');
 
 var sKey=fs.readFileSync('./private.key');
 
-
+var results_per_page;
 // console.log(validate.toDate(null));
 
 var login= (req,res)=>{
@@ -55,26 +55,23 @@ var isLogin = (req,res,next) =>{
 }
 
 var playground = (req,res,next) =>{
-  db.User.update({token:"Prince Aora"},{
-    where:{id:3},
-  }).then(data=>{}).catch(e=>{});
+  // db.User.findAll({
+  //   include:[{
+  //     model:db.customer,
+  //     include:[{
+  //       model:db.Policy,
+  //       include:[
+  //         {
+  //           model:db.Installments
+  //         }
+  //       ],
+  //     }],
+  //   }]
+  // }).then(d=>{
+  //   res.send(d);
+  // })
 
-  // // var temp=  db.User.test();
-  // // temp.then((data)=>{
-  // //   res.send(data);
-  // //   //console.log(data);
-  // // });
-  //
-  // var temp =  db.User.generateAuth({username:'prince',password:'123'});
-  //   temp.then(data=>{
-  //     res.send(data);
-  //   })
-  //
-  // // temp.then((data)=>{
-  // //   console.log(data)
-  // // }).catch(e=>{
-  // //   console.log(e);
-  // // };
+
 };
 
 var updatePolicyStatus = (req,res,next)=>{
@@ -96,10 +93,8 @@ var updatePolicyStatus = (req,res,next)=>{
 }
 
 var getCustomers = (req,res,next)=>{
-  db.customer.findAll({where:{agent_id:req.body._id}}).then(data=>{
-    // Res.success(res,{d:data});
-    console.log(data);
-    Res.success(res,{data});
+  db.customer.getAll(req,res,next).then(data=>{
+    Res.success(res,{data,pagination:req.pagination});
   });
 };
 
@@ -116,7 +111,6 @@ var addCustomer= (req,res,next)=> {
     }
   //  res.send(e);
   });
-
 //  res.send("hi");
 };
 
@@ -241,6 +235,30 @@ var updateCustomerStatus =(req,res)=>{
   });
 };
 
+var policyInfo= (req,res,next)=>{
+  db.Policy.findOne({
+    atttributes:[],
+    where:{id:req.body.policy_id,
+      is_deleted:false,
+    },
+    include:[{
+      model:db.Installments
+    }],
+  }).then(data=>{
+    var due_date;
+    data.Installments.some(installment=>{
+
+      if(installment.is_paid==null ||  installment.is_paid==false){
+        due_date=installment.due_date;
+        return true;
+
+      }
+    });
+    console.log(due_date);
+    Res.success(res,{data});
+  });
+}
+
 ///////
 module.exports={
   login,
@@ -253,5 +271,6 @@ module.exports={
   makeInstallments,
   deleteCustomer,
   updateCustomer,
-  updateCustomerStatus
+  updateCustomerStatus,
+  policyInfo
 };

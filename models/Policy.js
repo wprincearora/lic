@@ -8,7 +8,6 @@ var modes=[1,2,3,4,5];
 
 module.exports = (sequelize, DataTypes) => {
     ////
-
   var Policy = sequelize.define('Policy', {
     id: {
       type: DataTypes.INTEGER,

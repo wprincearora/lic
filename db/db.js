@@ -47,7 +47,40 @@ sequelize.import('./../models/installments.js');
 
 sequelize.import('./../models/Modes.js');
 
+
 var db=sequelize.models;
+
+db.customer.belongsTo(db.User,{
+   foreignKey: 'agent_id',
+});
+
+db.User.hasMany(db.customer,{
+  foreignKey:'agent_id'
+});
+
+db.customer.hasMany(db.Policy,{
+ foreignKey:'customer_id'
+})
+
+db.Policy.belongsTo(db.customer,{
+  foreignKey:'customer_id',
+});
+
+db.Policy.hasMany(db.Installments,{
+  foreignKey:'policy_id'
+});
+
+db.Installments.belongsTo(db.Policy,{
+  foreignKey:'policy_id'
+});
+
+db.Policy.hasOne(db.Modes,{
+  foreignKey:'mode'
+});
+
+db.Modes.belongsTo(db.Policy,{
+  foreignKey:'mode'
+})
 
    module.exports={
      db,

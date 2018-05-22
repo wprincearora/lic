@@ -1,8 +1,8 @@
 const _ = require('lodash');
 var {db}= require('./../db/db');
 const Res = require('./../Response');
-module.exports = (req,res,next)=>{
-    var input=_.pick(req.body,['policy_id','_id','customer_id']);
+var customer = (req,res,next)=>{
+    var input=_.pick(req.body,['_id','customer_id']);
     // db.Policy.findAll().then(data=>{
     //   res.send(data);
     // }).catch(e=>{
@@ -17,24 +17,41 @@ module.exports = (req,res,next)=>{
       }).catch(e=>{
         Res.e400(res);
       });
-    }else if(!_.isEmpty(input.policy_id)){
-      console.log("hi");
     }else{
       return Res.badReq(res);
     }
 
-    // // db.Policy.findAll();
-    //  db.Policy.findOne({where:{
-    //   id:input.policy_id,
-    //   agent_id:input._id
-    // }}).then((success)=>{
-    //   if(!_.isEmpty(success)){
-    //       next();
-    //   }else{
-    //     Res.badReq(res);
-    //   }
-    // }).catch((error)=>{
-    //   // console.log(error);
-    // });
-    // next();
-}
+};
+
+var policy = (req,res,next)=>{
+    var input=_.pick(req.body,['_id','policy_id']);
+    if(!_.isEmpty(input.policy_id)){
+      db.Policy.findOne({
+        where:{id:input.policy_id},
+        include:[{
+          model:db.customer,
+          include:[{
+            model:db.User
+          }]
+        }]
+      }).then(data=>{
+      if(input._id==data.customer.User.id){
+        next();
+      }else{
+          return Res.badReq(res);
+      }
+    }).catch(e=>{
+      Res.e400(res);
+    });
+
+    }else{
+      return Res.badReq(res);
+    }
+
+};
+
+
+module.exports={
+      policy,
+      customer,
+    };

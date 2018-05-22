@@ -3,7 +3,7 @@ var sKey=fs.readFileSync('./private.key');
 const _ = require('lodash')
 var token = require('jsonwebtoken');
 const Sequelize = require('Sequelize');
-
+var results_per_page=5;
 
 module.exports = (sequelize, DataTypes) => {
 
@@ -78,11 +78,26 @@ module.exports = (sequelize, DataTypes) => {
       //Options
       });
 
-      Customer.test = () => User.findOne().then((data) => {
-      //console.log(data);
-      return data;
-    });
-
+    Customer.getAll= (req,res,next) =>{
+      var page=1;
+      if(req.query.page){
+        page=req.query.page;
+      }
+      var offset=results_per_page*(page-1);
+      req.pagination={results_per_page,current_page:page};
+     return Customer.findAll({
+       
+      attributes:[
+        'id',
+        'name',
+        'email',
+        'dob',
+        'email',
+        'mobile1',
+        'mobile2',
+        'active_status'
+      ],where:{agent_id:req.body._id,is_deleted:false},limit:results_per_page,offset:offset});
+    };
 
 
 

@@ -22,12 +22,12 @@ router.get('/',[function(req,res){
 }]);
 
 /********************Routes for policies*****************************/
-proutes.use(isValid);
 
-proutes.post('/add',[mainController.addPolicy,mainController.makeInstallments]);
+
+proutes.post('/add',[isValid.customer,mainController.addPolicy,mainController.makeInstallments]);
 // proutes.post('/update/status',mainController.updatePolicyStatus);
 
-
+proutes.post('/info',[isValid.policy,mainController.policyInfo]);
 
 /******************************************************************/
 
@@ -37,15 +37,16 @@ router.use('/policy/',proutes);
 
 router.post('/get/list',mainController.getCustomers);
 
-router.get('/playground',mainController.playground);
+router.post('/playground',mainController.playground);
 
 router.post('/add/customer',mainController.addCustomer);
 
-router.post('/delete/customer',[isValid,mainController.deleteCustomer]);
+router.post('/delete/customer',[isValid.customer,mainController.deleteCustomer]);
 
-router.post('/update/customer',[isValid,mainController.updateCustomer]);
+router.post('/update/customer',[isValid.customer,mainController.updateCustomer]);
 
-router.post('/update/customer/status',[isValid,mainController.updateCustomerStatus]);
+router.post('/update/customer/status',[isValid.customer,mainController.updateCustomerStatus]);
+
 
 /////////
 module.exports = router;
