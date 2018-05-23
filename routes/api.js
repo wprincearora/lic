@@ -29,6 +29,7 @@ proutes.post('/add',[isValid.customer,mainController.addPolicy,mainController.ma
 
 proutes.post('/info',[isValid.policy,mainController.policyInfo]);
 
+proutes.post('/pay',[isValid.policy,mainController.payInstallment]);
 /******************************************************************/
 
 router.use('/policy/',proutes);

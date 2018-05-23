@@ -237,7 +237,7 @@ var updateCustomerStatus =(req,res)=>{
 
 var policyInfo= (req,res,next)=>{
   db.Policy.findOne({
-    atttributes:[],
+    attributes:{exclude:['createdAt','updatedAt','is_deleted']},
     where:{id:req.body.policy_id,
       is_deleted:false,
     },
@@ -254,11 +254,29 @@ var policyInfo= (req,res,next)=>{
 
       }
     });
-    console.log(due_date);
-    Res.success(res,{data});
+
+    Res.success(res,{data:data,upcoming_due_date:due_date});
   });
 }
 
+var payInstallment = (req,res,next)=>{
+  db.Policy.findOne({
+    where:{id:req.body.policy_id},
+    attributes:['id'],
+    include:[{
+      model:db.Installments,
+      where:{is_paid:false},
+      limit:1,
+    }],
+  }).then(d=>{
+    var id=d.Installments[0].id;
+    if(!id){
+      Res.badReq(res,{msg:"All installments are already paid"});
+    }
+    // db.Installments.update()
+    res.send("kjj"+Date.now());
+  });
+}
 ///////
 module.exports={
   login,
@@ -272,5 +290,6 @@ module.exports={
   deleteCustomer,
   updateCustomer,
   updateCustomerStatus,
-  policyInfo
+  policyInfo,
+  payInstallment,
 };
