@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-var Sequelize = require('sequelize');
+var Sequelize = require('Sequelize');
 
 const Op=Sequelize.Op;
 
