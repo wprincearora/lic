@@ -1,6 +1,9 @@
 const fs = require('fs');
 
 var Sequelize = require('sequelize');
+
+const Op=Sequelize.Op;
+
 var sequelize = new Sequelize('lic', 'root', '', {
   host: 'localhost',
   dialect: 'mysql',
@@ -47,6 +50,10 @@ sequelize.import('./../models/installments.js');
 
 sequelize.import('./../models/Modes.js');
 
+sequelize.import('./../models/Otp.js');
+
+sequelize.import('./../models/Admin.js');
+
 
 var db=sequelize.models;
 
@@ -86,4 +93,5 @@ db.Modes.belongsTo(db.Policy,{
      db,
      connectionCheck,
      sequelize,
+     Op
    };

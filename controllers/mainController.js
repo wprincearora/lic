@@ -9,7 +9,10 @@ const fs = require('fs');
 
 var {db} = require('./../db/db.js');
 
+const {Op}= require('./../db/db.js');
+
 var Res = require('./../Response');
+
 
 // const moment = require('moment');
 
@@ -22,7 +25,7 @@ var login= (req,res)=>{
   var input = _.pick(req.body,['username','password']);
   input.verified=1;
   if(_.isEmpty(input.password) || _.isEmpty(input.username) ){
-    return badReq(res);
+    return Res.badReq(res);
     }
     var temp =  db.User.generateAuth(input);
       temp.then(data=>{
@@ -113,6 +116,7 @@ var addCustomer= (req,res,next)=> {
   });
 //  res.send("hi");
 };
+
 
 var addPolicy = (req,res,next)=>{
    var input = _.pick(req.body,[
@@ -269,13 +273,191 @@ var payInstallment = (req,res,next)=>{
       limit:1,
     }],
   }).then(d=>{
-    var id=d.Installments[0].id;
-    if(!id){
-      Res.badReq(res,{msg:"All installments are already paid"});
+    var id;
+    if(_.isEmpty(d.Installments[0])){
+      return   Res.badReq(res,{msg:"All installments are already paid"});
     }
-    // db.Installments.update()
-    res.send("kjj"+Date.now());
+    var id=d.Installments[0].id;
+    db.Installments.update({is_paid:true,paid_at:getDate()},{
+      where:{
+        id
+      }
+    }).then(d=>{
+        return Res.success(res,{msg:'Installment paid for policy number '+req.body.policy_id});
+    }).catch(e=>{
+      Res.e400(res);
+    });
+
   });
+}
+
+
+var getDate=()=>{
+  var date = new Date;
+  var month=date.getMonth()+1;
+  return `${date.getFullYear()}-${month}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
+var fetchPolicies = (req,res,next)=>{
+  var customer_id=req.body.customer_id;
+  db.Policy.findAll({
+    where:{customer_id,is_deleted:false},
+    include:[{model:db.Installments}]
+  }).then(data=>{
+    Res.success(res,{data});
+  }).catch(e=>{
+    Res.e400(res);
+  });
+
+}
+
+var deletePolicy = (req,res,next)=>{
+  var id=req.body.policy_id;
+  db.Policy.update({is_deleted:true},{
+    where:{id}
+  }).then(d=>{
+    Res.success(res,{msg:'Policy deleted Successfully...!! '});
+  }).catch(e=>{
+    Res.e400(res);
+  });
+}
+
+var updateUser = (req,res,next)=>{
+
+  var input=_.pick(req.body,['username','name','email']);
+  if(_.isEmpty(input.username) || _.isEmpty(input.name) || _.isEmpty(input.email)){
+  return   Res.badReq(res,{msg:"Empty fields"});
+  }
+  db.User.findAndCount({
+    where:{
+      username:input.username,
+      id:{
+        [Op.ne]:req.body._id
+      }
+    }
+  }).then(data=>{
+    if(data.count){
+      return Res.badReq(res,{msg:"Username already exists"});
+    }
+      update();
+  }).catch(error=>{
+    return Res.e400(res);
+  })
+
+var update =()=>{
+  db.User.update({
+    username:input.username,
+    name:input.name,
+    email:input.email
+  },{
+    where:{id:req.body._id}
+  }).then(data=>{
+    Res.success(res,{msg:"Profile updated Successfully...!!!!!!!!!!"},false);
+  }).catch(e=>{
+    if(e.name=='SequelizeValidationError'){
+      Res.badReq(res,{validationError:true,errors:e.errors});
+    }else{
+      Res.badReq(res);
+    }
+  });
+};
+//
+}
+
+var userForgotPassword = (req,res,next)=>{
+  var input=_.pick(req.body,['username']);
+  if(_.isEmpty(input.username)){
+    return Res.badReq(res,{msg:"Empty field"});
+  }
+  db.User.findOne({
+    where:{username:input.username}
+  }).then(data=>{
+    if(_.isEmpty(data)){
+        return Res.badReq(res,{msg:"Invalid Username"});
+      }
+        //creating token
+        var webToken=token.sign({
+          exp: Math.floor(Date.now() / 1000) + (60 * 15),
+          data:data.id
+        }, sKey);
+
+        if(webToken){
+          var otp =generateOtp();
+          db.Otp.create({user_id:data.id,token:webToken,otp}).then(d=>{
+            //sendMail()
+            return Res.success(res,{msg:"A otp is generated for 15 mins ",session:webToken});
+          })
+        }else{
+            return Res.e400(res);
+        }
+
+  }).catch(e=>{
+      Res.e400(res);
+  });
+}
+
+var generateOtp= (min=111111,max=999999)=>{
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+var userUpdatePassword = (req,res,next) =>{
+  var id=req.body.otpInfo.user_id;
+  var otpId=req.body.otpInfo.id;
+  db.User.update({password:req.body.password},{
+    where:{
+      id
+    }
+  }).then(data=>{
+    if(data){
+      db.User.update({token:null},{
+        where:{id}
+      }).catch(err=>{});
+      db.Otp.update({is_consumed:true},{
+        where:{id:otpId}
+      }).catch(err=>{});
+      return Res.success(res,{msg:'Password Updated Successfully'});
+    }else{
+      return Res.badReq(res,{msg:"Unknown Error"});
+    }
+  }).catch(err=>{
+    Res.e400(res);
+  })
+
+}
+
+var userVerifyOtp = (req,res,next) =>{
+  input=_.pick(req.body,['session','password','otp']);
+  if(_.isEmpty(input.session) || _.isEmpty(input.password) || _.isEmpty(input.otp) ){
+    return Res.badReq(res,{msg:'Empty Fields'});
+  }
+  // input.otp=parseInt(input.otp);
+    db.Otp.findOne({
+      where:{
+        token:input.session,
+        is_consumed:false
+      }
+    }).then(otpInfo=>{
+      if(otpInfo){
+        token.verify(input.session,sKey,(err,data)=>{
+            if(err){
+              return Res.badReq(res,{msg:'Otp Expired'});
+            }
+            if(otpInfo.otp==input.otp){
+              req.body.otpInfo=otpInfo;
+              next();
+            }else{
+
+              console.log(input.otp==otpInfo.otp);
+              return Res.badReq(res,{msg:'Invalid Otp'});
+            }
+
+        });
+      }else{
+        Res.badReq(res,{msg:'Invalid Session'});
+      }
+    }).catch(err=>{
+
+    });
 }
 ///////
 module.exports={
@@ -292,4 +474,10 @@ module.exports={
   updateCustomerStatus,
   policyInfo,
   payInstallment,
+  fetchPolicies,
+  deletePolicy,
+  updateUser,
+  userForgotPassword,
+  userUpdatePassword,
+  userVerifyOtp,
 };

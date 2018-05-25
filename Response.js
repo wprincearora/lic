@@ -19,12 +19,14 @@ var notAuth = (res,data={})=>{
   res.status(401).send(data);;
 }
 
-var success = (res,data={})=>{
+var success = (res,data={},authinfo=true)=>{
   data.error=false;
   if(!data.msg){
     data.msg="Success";
   }
+  if(authinfo){
   data.AuthorizedInfo=res.basicInfo;
+}
   res.send(data);;
 }
 

@@ -13,9 +13,16 @@ var isLogin = require('./../middlewares/isLogin');
 //unauthorized routes
 router.post('/login',mainController.login);
 
+router.post('/user/forgot/password',mainController.userForgotPassword);
+
+router.post('/user/change/password',[mainController.userVerifyOtp,mainController.userUpdatePassword]);
+
 // router.post('/hi')
 //authorized Routes
+
 router.use(isLogin);
+
+router.post('/user/update',mainController.updateUser);
 
 router.get('/',[function(req,res){
   res.send("hello "+req.body._name);
@@ -30,6 +37,11 @@ proutes.post('/add',[isValid.customer,mainController.addPolicy,mainController.ma
 proutes.post('/info',[isValid.policy,mainController.policyInfo]);
 
 proutes.post('/pay',[isValid.policy,mainController.payInstallment]);
+
+proutes.post('/get/all',[isValid.customer,mainController.fetchPolicies]);
+
+proutes.post('/delete',[isValid.policy,mainController.deletePolicy]);
+
 /******************************************************************/
 
 router.use('/policy/',proutes);
